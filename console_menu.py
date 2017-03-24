@@ -24,7 +24,7 @@ import time
 
 
 class ConsoleMenu(object):
-    def __init__(self, menu_text, menu_prompt='', menu_items = None):
+    def __init__(self, menu_text, menu_prompt='', menu_items=None):
         self.menu_text = menu_text
         if menu_prompt:
             self.menu_prompt = menu_prompt
@@ -111,7 +111,7 @@ if __name__ == '__main__':
              (say_hello, 'Item 2 does nothing'),
              (say_hello, 'Item 3 does about as much as item 2'),
              (say_hello, 'Item 4 dont do much'),
-             (say_hello, 'Item 5 is another menu')]
+             (say_hello, 'Item 5 is another useless line')]
     menu = ConsoleMenu('Please choose a useless option', menu_items=items)
     another_menu = ConsoleMenu('Please choose another useless option')
     another_menu.add_menu_item(make_printer('one'), 'Item One')
@@ -119,11 +119,13 @@ if __name__ == '__main__':
     another_menu.add_menu_item(make_printer('three'), 'Item Three')
     menu.add_menu_item(another_menu, 'Do sub menu')
     action = menu.run_menu()
-    action()
+    if action:
+        action()
 
     items = [('foo', 'gimmie foo'),
              ('bar', 'gimmie bar'),
              ('baz', 'gimmie baz')]
-    menu = ConsoleMenu('Please choose something... anything!', menu_items=items)
+    menu = ConsoleMenu("We can't stop now! choose something... anything.", menu_items=items)
     action = menu.run_menu()
-    print 'you chose:', action
+    if action:
+        print 'you chose:', action
