@@ -32,11 +32,10 @@ class ConsoleMenu(object):
             self.menu_prompt = 'Choice: '
         self.menu_items = {}
         if menu_items:
-            self._verify_menu_items_type(menu_items)
-            for command, text in menu_items:
-                self.add_menu_item(command, text)
-        # when we create a child, builtin commands gets extended with a back option        
-        self.builtin_commands = {'q' : (self.quit, 'quit')}
+            for item, text in menu_items:
+                self.add_menu_item(item, text)
+        # when we create a child, builtin commands gets extended with a back option
+        self.builtin_commands = {'q': (self.quit, 'quit')}
         self.parent = None
 
     def __call__(self):
@@ -44,15 +43,13 @@ class ConsoleMenu(object):
         return self.run_menu()
 
     def quit(self):
-        def do_nothing():
-            pass
-        return do_nothing
+        return lambda: None
 
     def run_menu(self):
-        valid_input = False
-        while not valid_input:
+        user_choice = None
+        while not user_choice:
             self._display()
-            valid_input, user_choice = self._get_user_input()
+            user_choice = self._get_user_input()
         if user_choice not in self.builtin_commands:
             user_choice = int(user_choice)
 
@@ -66,14 +63,13 @@ class ConsoleMenu(object):
 
     def add_menu_item(self, command, text):
         item_number = len(self.menu_items) + 1
-        self._verify_menu_item(item_number, command, text)
         self.menu_items[item_number] = (command, text)
         if isinstance(command, ConsoleMenu):
             command.parent = self
             command.builtin_commands['b'] = (self, 'back')
 
     def _display(self):
-        print 
+        print
         print '--------------------------------------------------'
         print self.menu_text
         print '--------------------------------------------------'
@@ -88,48 +84,32 @@ class ConsoleMenu(object):
 
     def _get_user_input(self):
         str_items = [str(i) for i in self.menu_items.keys()]
-        valid_items = list(self.builtin_commands) + str_items
+        valid_items = list(self.builtin_commands.keys()) + str_items
         try:
             user_input = raw_input(self.menu_prompt)
             user_input = user_input.strip()
         except EOFError:
             # pressing ctrl-d generates EOFError
             user_input = 'q'
-        valid_input = user_input in valid_items
-        if not valid_input:
+        if user_input not in valid_items:
             print
             print '**************************************************'
             print 'Error: invalid input, please try again'
             print '**************************************************'
             time.sleep(1)
-        return valid_input, user_input
-    
-    def _verify_menu_items_type(self, menu_items):
-        if not menu_items:
-            return
-        elif not isinstance(menu_items, collections.Sequence):
-            msg = 'menu_items argument to ConsoleMenu constructor must be a sequence'
-        for i, item in enumerate(menu_items):
-            if not isinstance(item, collections.Sequence):
-                msg = 'Menu item #%d passed to ConsoleMenu constructor is not a sequence.  Offending item is: %s' % (i, str(item))
-                raise ValueError(msg)
-            
-    def _verify_menu_item(self, item_number, command, text):
-        if not callable(command):
-            msg = 'Command for menu item #%d is not callable.  Offending item is: %s' % (item_number, str((command, text)))
-            raise ValueError(msg)
-        if type(text) != str:
-            msg = 'Text for menu item #%d is not a string.  Offending item is: %s' % (item_number, str((command, text)))
-            raise ValueError(msg)
-    
-    
+            user_input = None
+        return user_input
+
+
 if __name__ == '__main__':
     def say_hello():
         print 'hello'
+
     def make_printer(printthis):
         def _():
             print printthis
         return _
+
     items = [(say_hello, 'Item 1'),
              (say_hello, 'Item 2 does nothing'),
              (say_hello, 'Item 3 does about as much as item 2'),
@@ -143,3 +123,10 @@ if __name__ == '__main__':
     menu.add_menu_item(another_menu, 'Do sub menu')
     action = menu.run_menu()
     action()
+
+    items = [('foo', 'gimmie foo'),
+             ('bar', 'gimmie bar'),
+             ('baz', 'gimmie baz')]
+    menu = ConsoleMenu('Please choose something... anything!', menu_items=items)
+    action = menu.run_menu()
+    print 'you chose:', action
