@@ -1,4 +1,6 @@
-A simple class for creating console menus
+A class for creating console menus.  Supports nested menus.
+
+Example:
 
 --------------------------------------------------
 Please choose a useless option

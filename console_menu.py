@@ -35,15 +35,12 @@ class ConsoleMenu(object):
             for item, text in menu_items:
                 self.add_menu_item(item, text)
         # when we create a child, builtin commands gets extended with a back option
-        self.builtin_commands = {'q': (self.quit, 'quit')}
+        self.builtin_commands = {'q': (None, 'quit')}
         self.parent = None
 
     def __call__(self):
         '''Allows a ConsoleMenu to be a command for a menu item (nested menus)'''
         return self.run_menu()
-
-    def quit(self):
-        return lambda: None
 
     def run_menu(self):
         user_choice = None
